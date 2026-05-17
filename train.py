@@ -1,7 +1,17 @@
 import json
 import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.linear_model import LogisticRegression
+except ModuleNotFoundError as error:
+    if error.name == "sklearn":
+        raise SystemExit(
+            "scikit-learn is not installed for this Python interpreter.\n"
+            "Run training with the project virtual environment instead:\n"
+            "  venv/bin/python train.py"
+        ) from error
+    raise
 
 with open("intents.json", "r") as f:
     intents = json.load(f)

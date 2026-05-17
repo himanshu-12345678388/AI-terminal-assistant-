@@ -5,7 +5,7 @@ print("Type 'help' to see available commands")
 print("Type 'exit' to quit\n")
 
 while True:
-    user_input = input(">> ").strip().lower()
+    user_input = input(">> ").strip()
 
     if user_input in ["exit", "quit"]:
         print("Goodbye 👋")

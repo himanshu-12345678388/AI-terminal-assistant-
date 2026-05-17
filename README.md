@@ -54,9 +54,9 @@ commands.py runs the matching safe command
 
 ## Supported safe commands
 
-The assistant currently supports informational or harmless commands such as:
+The assistant supports informational commands plus three intentionally limited file actions.
 
-| Intent | What it does |
+| Intent / input | What it does |
 |---|---|
 | `list_files` | Shows files in the current directory with `ls`. |
 | `current_dir` | Shows the current directory with `pwd`. |
@@ -68,29 +68,62 @@ The assistant currently supports informational or harmless commands such as:
 | `cpu_info` | Shows CPU details with `lscpu`. |
 | `current_user` | Shows the logged-in user with `whoami`. |
 | `hostname` | Shows the machine name with `hostname`. |
+| `os_info` | Shows Linux distribution details with `lsb_release -a`, or `/etc/os-release` as a fallback. |
+| `gpu_info` | Shows GPU-related entries from `lspci` when available. |
+| `battery_info` | Reads non-destructive battery status from `/sys/class/power_supply`. |
+| `network_info` / `ip_address` | Shows network interfaces and IP addresses with `ip addr show`. |
+| `logged_in_users` | Shows logged-in users with `who`. |
+| `running_processes` | Shows the ten largest processes by memory usage. |
+| `environment_info` | Prints selected environment variables such as `USER`, `HOME`, and `PATH`. |
+| `shell_info` | Shows the current shell from the `SHELL` environment variable. |
+| `python_version` | Shows the installed Python version with `python3 --version`. |
+| `package_manager_info` | Detects common package managers such as `apt`, `dnf`, and `pacman`. |
+| `fastfetch_info` | Runs `fastfetch` if installed; otherwise falls back to `uname`, `lscpu`, `free`, and `df`. |
+| `touch filename` or `create file filename` | Creates one file in the current project directory. |
+| `mkdir foldername` or `create folder foldername` | Creates one folder in the current project directory. |
+| `cp source destination` or `copy source to destination` | Copies one existing file to another simple filename in the current project directory. |
 | `open_firefox` | Opens Firefox. |
 | `calculator` | Opens the calculator application. |
 
-## Safety: no destructive commands
+## Safety: intentionally narrow file operations
 
-This version is intentionally designed to avoid dangerous or destructive terminal actions.
-
-It does **not** contain commands such as:
+This project does **not** implement destructive or privileged commands such as:
 
 ```text
 rm
-rm -rf
-mkdir
 rmdir
 mv
-cp
+chmod
+chown
+sudo
 shutdown
 reboot
+kill
+mkfs
+dd
 ```
 
-The assistant is currently focused on reading system information, not changing or deleting files.
+Those commands are blocked on purpose because they can delete data, alter permissions, stop the machine, or damage disks. The assistant is meant to be safe for learning, so it only supports read-only system information and three constrained file actions.
 
-It also includes a confidence threshold in `model.py`. If the model is not confident enough about a phrase, it returns `unknown` instead of forcing an unrelated command. For example, unsupported input such as `abc` is rejected rather than executed.
+For file actions, the assistant:
+
+- accepts only simple names in the current project directory
+- rejects names containing `/`, `..`, `~`, `*`, `?`, `&`, `|`, `;`, `$`, `` ` ``, `>`, or `<`
+- asks for missing arguments instead of guessing
+- uses Python APIs or `subprocess.run([...])` argument lists rather than passing raw user input to `shell=True`
+
+Examples:
+
+```text
+touch notes.txt
+create file notes.txt
+mkdir examples
+create folder examples
+cp notes.txt backup.txt
+copy notes.txt to backup.txt
+```
+
+The project also includes a confidence threshold in `model.py`. If the model is not confident enough about a phrase, it returns `unknown` instead of forcing an unrelated command.
 
 ## How to run the project
 
@@ -107,6 +140,8 @@ cd AI-terminal-assistant-
 venv/bin/python train.py
 ```
 
+Use `venv/bin/python`, not plain `python3`, because the project dependencies such as `scikit-learn` are installed inside the virtual environment.
+
 4. Start the assistant:
 
 ```bash
@@ -119,6 +154,14 @@ You can also use the helper script:
 ./run.sh
 ```
 
+## How to run the tests
+
+The project now includes a small standard-library test suite for safe file handling, fallback command routing, and the new intents:
+
+```bash
+venv/bin/python -m unittest discover -s tests -v
+```
+
 To exit the assistant:
 
 ```text
@@ -129,13 +172,24 @@ exit
 
 ```text
 disk usage
-memory usage
-cpu info
-kernel info
-uptime
-who am i
-hostname
-where am i
+os info
+gpu info
+battery info
+network info
+ip address
+logged in users
+running processes
+environment info
+shell info
+python version
+package manager info
+fastfetch info
+touch notes.txt
+create file notes.txt
+mkdir examples
+create folder examples
+cp notes.txt backup.txt
+copy notes.txt to backup.txt
 ```
 
 ## Proof that the model works
@@ -176,8 +230,8 @@ The assistant exits normally when the user types `exit`:
 
 Possible next steps include:
 
-- adding more safe informational intents
-- adding a proper `help` command
+- adding automated tests for safety validation
+- improving help output further
 - increasing the number of training examples
 - improving unknown-command detection further
 - adding tests for intent prediction and command routing

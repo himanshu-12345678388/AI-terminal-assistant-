@@ -1,10 +1,13 @@
 import pickle
+from pathlib import Path
 
-# Load trained objects
-with open("vectorizer.pkl", "rb") as f:
+BASE_DIR = Path(__file__).resolve().parent
+
+# Load trained objects from beside this file, not from whichever folder launched Python.
+with open(BASE_DIR / "vectorizer.pkl", "rb") as f:
     vectorizer = pickle.load(f)
 
-with open("intent_model.pkl", "rb") as f:
+with open(BASE_DIR / "intent_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 MIN_CONFIDENCE = 0.12
