@@ -1,6 +1,6 @@
-# AI Terminal Assistant
+# E-SHELL
 
-AI Terminal Assistant is a small Python project that lets a user interact with a Linux terminal using simple natural-language phrases instead of remembering exact shell commands.
+E-SHELL is a small Python-based shell that lets a user interact with a Linux terminal using simple natural-language phrases instead of remembering exact shell commands.
 
 For example, a user can type:
 
@@ -11,22 +11,22 @@ kernel info
 who am i
 ```
 
-and the assistant predicts the user's intent, then runs the matching safe system-information command.
+and E-SHELL predicts the user's intent, then runs the matching safe system-information command.
 
-## Why this project is useful
+## Why E-SHELL is useful
 
-This project is useful because it:
+E-SHELL is useful because it:
 
 - makes common terminal tasks easier for beginners
 - shows how a simple machine-learning classifier can be connected to real commands
 - demonstrates intent classification using `TF-IDF` and `LogisticRegression`
-- provides a safer way to experiment with natural-language terminal control by using only non-destructive commands
+- provides a safer way to experiment with natural-language shell control by using only non-destructive commands
 
-It is a good learning project for anyone interested in Python, machine learning, Linux commands, or building assistant-style tools.
+It is a good learning project for anyone interested in Python, machine learning, Linux commands, or building shell-style tools.
 
-## How the project works
+## How E-SHELL works
 
-The project has a small pipeline:
+E-SHELL has a small pipeline:
 
 ```text
 User input
@@ -42,7 +42,7 @@ commands.py runs the matching safe command
 
 | File | Purpose |
 |---|---|
-| `assistant.py` | Starts the assistant, reads user input, and passes it to the command handler. |
+| `assistant.py` | Starts the E-SHELL session, reads user input, and passes it to the command handler. |
 | `commands.py` | Contains the supported safe actions that can be executed. |
 | `intents.json` | Stores example phrases for each supported intent. |
 | `workspace/` | Safe folder for files that can be edited, made executable, or run. |
@@ -50,12 +50,12 @@ commands.py runs the matching safe command
 | `model.py` | Loads the saved model and predicts the intent for new user input. |
 | `vectorizer.pkl` | Saved TF-IDF vectorizer created during training. |
 | `intent_model.pkl` | Saved trained intent classifier. |
-| `run.sh` | Helper script for starting the assistant. |
+| `run.sh` | Helper script for starting E-SHELL. |
 | `HOW_TO_RUN.txt` | Short plain-text run instructions. |
 
 ## Supported safe commands
 
-The assistant supports informational commands plus three intentionally limited file actions.
+E-SHELL supports informational commands plus intentionally limited file actions.
 
 | Intent / input | What it does |
 |---|---|
@@ -93,7 +93,7 @@ The assistant supports informational commands plus three intentionally limited f
 
 ## Safety: intentionally narrow file operations
 
-This project blocks destructive or privileged commands such as:
+E-SHELL blocks destructive or privileged commands such as:
 
 ```text
 rm
@@ -112,7 +112,7 @@ dd
 
 Those commands are blocked on purpose because they can delete data, alter permissions, stop the machine, or damage disks. The only permission change supported is the narrow phrase `make filename executable`, which runs `chmod +x` on a validated file inside `workspace/`.
 
-For file actions, the assistant:
+For file actions, E-SHELL:
 
 - accepts only simple names in the current project directory
 - rejects names containing `/`, `..`, `~`, `*`, `?`, `&`, `|`, `;`, `$`, `` ` ``, `>`, or `<`
@@ -150,15 +150,15 @@ make script.sh executable
 run hello.py
 ```
 
-The project also includes a confidence threshold in `model.py`. If the model is not confident enough about a phrase, it returns `unknown` instead of forcing an unrelated command.
+E-SHELL also includes a confidence threshold in `model.py`. If the model is not confident enough about a phrase, it returns `unknown` instead of forcing an unrelated command.
 
-## How to run the project
+## How to run E-SHELL
 
 1. Open a terminal.
 2. Move into the project directory:
 
 ```bash
-cd AI-terminal-assistant-
+cd E-SHELL
 ```
 
 3. If you changed `intents.json`, retrain the model:
@@ -167,9 +167,9 @@ cd AI-terminal-assistant-
 venv/bin/python train.py
 ```
 
-Use `venv/bin/python`, not plain `python3`, because the project dependencies such as `scikit-learn` are installed inside the virtual environment.
+Use `venv/bin/python`, not plain `python3`, because the E-SHELL dependencies such as `scikit-learn` are installed inside the virtual environment.
 
-4. Start the assistant:
+4. Start E-SHELL:
 
 ```bash
 venv/bin/python assistant.py
@@ -183,13 +183,13 @@ You can also use the helper script:
 
 ## How to run the tests
 
-The project now includes a small standard-library test suite for safe file handling, fallback command routing, and the new intents:
+E-SHELL includes a small standard-library test suite for safe file handling, fallback command routing, and the new intents:
 
 ```bash
 venv/bin/python -m unittest discover -s tests -v
 ```
 
-To exit the assistant:
+To exit E-SHELL:
 
 ```text
 exit
@@ -230,39 +230,39 @@ The screenshots below show the trained model correctly recognizing several suppo
 
 ### Disk usage intent
 
-The assistant predicts `disk_usage` and shows filesystem storage information:
+E-SHELL predicts `disk_usage` and shows filesystem storage information:
 
 ![Disk usage prediction](docs/screenshots/disk-usage.png)
 
 ### CPU information intent
 
-The assistant predicts `cpu_info` and prints detailed processor information:
+E-SHELL predicts `cpu_info` and prints detailed processor information:
 
 ![CPU info prediction](docs/screenshots/cpu-info.png)
 
 ### Kernel information and unknown input handling
 
-The assistant predicts `kernel_info` for a kernel query, and it also rejects unsupported text as `unknown` instead of running an unsafe or unrelated command:
+E-SHELL predicts `kernel_info` for a kernel query, and it also rejects unsupported text as `unknown` instead of running an unsafe or unrelated command:
 
 ![Kernel info and unknown handling](docs/screenshots/kernel-and-unknown.png)
 
 ### Workspace editor and run safety
 
-The assistant shows the new help text, uses the safe workspace rules, asks before running code, and keeps unsupported command forms blocked:
+E-SHELL shows the new help text, uses the safe workspace rules, asks before running code, and keeps unsupported command forms blocked:
 
 ![Workspace editor and run safety](docs/screenshots/workspace-editor-run.png)
 
 ### Clean exit
 
-The assistant exits normally when the user types `exit`:
+E-SHELL exits normally when the user types `exit`:
 
-![Assistant exit](docs/screenshots/assistant-exit.png)
+![E-SHELL exit](docs/screenshots/assistant-exit.png)
 
 ## Current limitations
 
 - The model is trained on a small number of example phrases, so its vocabulary is still limited.
 - It is designed for Linux systems and uses Linux-specific commands.
-- It is a lightweight classifier-based assistant, not a large conversational AI model.
+- It is a lightweight classifier-based shell, not a large conversational AI model.
 
 ## Future improvements
 
